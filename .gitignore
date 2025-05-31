@@ -1,5 +1,5 @@
 # Конфиденциальные файлы
-apps_script/config.js
+config.js
 *.env
 .env*
 
