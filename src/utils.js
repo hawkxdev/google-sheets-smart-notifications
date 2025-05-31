@@ -1,7 +1,7 @@
 /**
  * @fileoverview Google Sheets Smart Notifications - Utilities
  * Вспомогательные функции общего назначения
- * 
+ *
  * @author hawkxdev
  * @version 1.0
  * @since 2025-05-31
@@ -46,6 +46,13 @@ function columnIndexToLetter(colIndex) {
 function getColumnName(sheetName, colIndex) {
     try {
         const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+
+        // Проверяем, что лист найден
+        if (!sheet) {
+            console.error(`Лист '${sheetName}' не найден`);
+            return columnIndexToLetter(colIndex);
+        }
+
         const headerValue = sheet.getRange(1, colIndex).getValue();
 
         if (headerValue?.toString().trim()) {
@@ -70,6 +77,12 @@ function getColumnName(sheetName, colIndex) {
 function getRowContext(sheetName, rowIndex) {
     try {
         const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+
+        // Проверяем, что лист найден
+        if (!sheet) {
+            console.error(`Лист '${sheetName}' не найден`);
+            return '';
+        }
 
         // Получаем заголовки из первой строки
         const lastColumn = sheet.getLastColumn();

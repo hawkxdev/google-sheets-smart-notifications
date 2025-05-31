@@ -3,6 +3,14 @@ config.js
 *.env
 .env*
 
+# Node.js
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# TypeScript/JavaScript конфигурация
+tsconfig.json
+
 # Системные файлы
 .DS_Store
 Thumbs.db
@@ -22,11 +30,7 @@ temp/
 *.swp
 *.swo
 
-# Node modules (если будут)
-node_modules/
-npm-debug.log*
-
-# Python (если будут утилиты)
+# Python
 __pycache__/
 *.pyc
 *.pyo

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Google Sheets Smart Notifications - Main Functions
  * Основные функции для тестирования и настройки системы
- * 
+ *
  * @author hawkxdev
  * @version 1.0
  * @since 2025-05-31
@@ -10,7 +10,7 @@
 /**
  * Тестирует основные компоненты системы
  * Проверяет подключение к Telegram Bot API и отправку уведомлений
- * 
+ *
  * @return {void}
  */
 function testSystemSetup() {
@@ -27,7 +27,7 @@ function testSystemSetup() {
 /**
  * Создает installable onEdit триггер для нашей демо-таблицы
  * Удаляет существующие триггеры и создает новый привязанный к конкретной таблице
- * 
+ *
  * @return {string} Сообщение о результате создания триггера
  * @throws {Error} Ошибка при создании триггера
  */

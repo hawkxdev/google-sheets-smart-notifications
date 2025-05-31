@@ -28,7 +28,7 @@ function sendTelegramMessage(message) {
   try {
     // Отправляем POST запрос к Telegram API
     const response = UrlFetchApp.fetch(url, {
-      method: "POST",
+      method: "post",
       headers: {"Content-Type": "application/json"},
       payload: JSON.stringify(payload)
     });
