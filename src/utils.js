@@ -10,17 +10,22 @@
 /**
  * Константы для типов статусов
  */
-const STATUS_TYPES = {
+const STATUS_TYPES = Object.freeze({
     COMPLETED: 'completed',
     IN_PROGRESS: 'in_progress',
     PROBLEM: 'problem',
     READY: 'ready'
-};
+});
 
 /**
  * Ключевые столбцы для контекста
  */
 const KEY_COLUMNS = ['клиент', 'товар', 'заказ', 'проект', 'задача', 'id'];
+
+/**
+ * Ключевые столбцы для новых записей (лист "Заявки")
+ */
+const NEW_RECORD_KEY_COLUMNS = [1, 3, 5, 6]; // Дата, Клиент, Услуга, Бюджет
 
 /**
  * Преобразует индекс столбца в буквенное обозначение
@@ -46,22 +51,17 @@ function columnIndexToLetter(colIndex) {
 function getColumnName(sheetName, colIndex) {
     try {
         const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
-
-        // Проверяем, что лист найден
         if (!sheet) {
             console.error(`Лист '${sheetName}' не найден`);
             return columnIndexToLetter(colIndex);
         }
 
         const headerValue = sheet.getRange(1, colIndex).getValue();
-
         if (headerValue?.toString().trim()) {
             return headerValue.toString();
         }
 
-        // Возвращаем буквенное обозначение столбца как fallback
         return columnIndexToLetter(colIndex);
-
     } catch (error) {
         console.error("Ошибка при получении имени столбца:", error);
         return columnIndexToLetter(colIndex);
@@ -77,23 +77,17 @@ function getColumnName(sheetName, colIndex) {
 function getRowContext(sheetName, rowIndex) {
     try {
         const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
-
-        // Проверяем, что лист найден
         if (!sheet) {
             console.error(`Лист '${sheetName}' не найден`);
             return '';
         }
 
-        // Получаем заголовки из первой строки
         const lastColumn = sheet.getLastColumn();
         const headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
-
-        // Получаем данные из текущей строки
         const rowData = sheet.getRange(rowIndex, 1, 1, lastColumn).getValues()[0];
 
         let context = '';
 
-        // Ищем ключевые столбцы для контекста
         for (let i = 0; i < headers.length; i++) {
             const header = headers[i]?.toString().toLowerCase();
             const value = rowData[i];
@@ -104,7 +98,6 @@ function getRowContext(sheetName, rowIndex) {
         }
 
         return context;
-
     } catch (error) {
         console.error("Ошибка при получении контекста строки:", error);
         return '';
@@ -156,7 +149,7 @@ function isSystemSheet(sheetName) {
  * @return {string} Отформатированное время
  */
 function formatTimestamp(timestamp) {
-    return timestamp.toLocaleString('ru-RU');
+    return Utilities.formatDate(timestamp, Session.getScriptTimeZone(), 'dd.MM.yyyy HH:mm');
 }
 
 /**
@@ -165,6 +158,5 @@ function formatTimestamp(timestamp) {
  * @return {string} Строковое представление значения
  */
 function getCellValueAsString(cellValue) {
-    if (!cellValue) return '';
-    return cellValue.toString().toLowerCase().trim();
+    return String(cellValue || '').toLowerCase().trim();
 }
