@@ -34,13 +34,6 @@ function detectNewRecord(event) {
 
         // Извлекаем данные новой записи
         const recordData = extractNewRecordData(sheet, range.getRow());
-
-        // Валидируем данные (достаточно ли информации для уведомления)
-        if (!validateRecordData(recordData)) {
-            console.log("Недостаточно данных для создания уведомления");
-            return;
-        }
-
         console.log("Обнаружена новая запись:", recordData);
 
         // Создаем и отправляем уведомление
@@ -81,38 +74,17 @@ function isNewRecord(event) {
         return false;
     }
 
-    // 🔥 УЛУЧШЕННАЯ ЛОГИКА:
-    
-    // 1. Проверяем что это ключевое поле для новых записей
+    // Проверяем что это ключевое поле (Клиент или Услуга)
     const columnIndex = range.getColumn();
-    const keyColumns = [1, 2, 3, 5]; // Дата, Время, Клиент, Услуга (основные поля для новых заявок)
-    
+    const keyColumns = [3, 5]; // C: Клиент, E: Услуга
+
     if (keyColumns.indexOf(columnIndex) === -1) {
-    console.log(`Столбец ${columnIndex} не является ключевым для новых записей`);
-    return false;
-    }
-
-    // 2. Подсчитываем количество заполненных ячеек в строке
-    const rowData = sheet.getRange(rowIndex, 1, 1, 6).getValues()[0];
-    const filledCells = rowData.filter(cell => 
-    cell && cell.toString().trim() !== ''
-    ).length;
-
-    console.log(`Строка ${rowIndex}: заполнено ${filledCells} из 6 ячеек`);
-
-    // 🎯 ЛОГИКА: Уведомляем ТОЛЬКО при вводе КЛИЕНТА (столбец 3)
-    
-    // Проверяем что это именно столбец "Клиент" (C)
-    if (columnIndex !== 3) {
-        console.log(`Столбец ${columnIndex} не является полем "Клиент" - пропускаем уведомление`);
+        console.log(`Столбец ${columnIndex} не является ключевым (Клиент или Услуга) - пропускаем уведомление`);
         return false;
     }
-    
-    // Если заполняется поле "Клиент" - это новая запись (независимо от количества других ячеек)
-    console.log(`Найдена новая запись в строке ${rowIndex} - заполнен Клиент (${filledCells} ячеек в строке)`);
+
+    console.log(`Найдена новая запись в строке ${rowIndex} - заполнено ${columnIndex === 3 ? 'Клиент' : 'Услуга'}`);
     return true;
-    
-    // Дополнительная проверка для массовой вставки (Ctrl+C/Ctrl+V) - уже не нужна
 }
 
 /**
@@ -131,7 +103,6 @@ function extractNewRecordData(sheet, rowIndex) {
             row: rowIndex,
             sheet: sheet.getName(),
             timestamp: new Date(),
-            // Основные поля
             date: rowData[0] || '', // A: Дата
             time: rowData[1] || '', // B: Время
             client: rowData[2] || '', // C: Клиент
@@ -142,10 +113,8 @@ function extractNewRecordData(sheet, rowIndex) {
 
         // Форматируем время если это число (Google Sheets время)
         if (typeof recordData.time === 'number') {
-            // Преобразуем число в формат времени
             const hours = Math.floor(recordData.time * 24);
             const minutes = Math.floor((recordData.time * 24 * 60) % 60);
-            // Используем совместимый способ добавления ведущих нулей
             const hoursStr = hours < 10 ? '0' + hours : hours.toString();
             const minutesStr = minutes < 10 ? '0' + minutes : minutes.toString();
             recordData.time = hoursStr + ':' + minutesStr;
@@ -157,28 +126,6 @@ function extractNewRecordData(sheet, rowIndex) {
         console.error("Ошибка при извлечении данных записи:", error);
         return null;
     }
-}
-
-/**
- * Валидирует данные записи - проверяет достаточно ли информации для уведомления
- * @param {Object} recordData - Данные записи
- * @return {boolean} true если данных достаточно
- */
-function validateRecordData(recordData) {
-    if (!recordData) {
-        return false;
-    }
-
-    // Минимальные требования: должен быть заполнен клиент ИЛИ услуга
-    const hasClient = recordData.client && recordData.client.toString().trim() !== '';
-    const hasService = recordData.service && recordData.service.toString().trim() !== '';
-
-    if (!hasClient && !hasService) {
-        console.log("Запись не содержит ни клиента, ни услуги - пропускаем");
-        return false;
-    }
-
-    return true;
 }
 
 /**
@@ -231,36 +178,6 @@ function createNewRecordNotification(recordData) {
 }
 
 /**
- * Получает все новые записи с момента последней проверки (для будущего использования)
- * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - Лист для проверки
- * @param {number} lastKnownRow - Последняя известная строка с данными
- * @return {Array} Массив новых записей
- */
-function getNewRecordsSince(sheet, lastKnownRow) {
-    try {
-        const currentLastRow = sheet.getLastRow();
-
-        if (currentLastRow <= lastKnownRow) {
-            return [];
-        }
-
-        const newRows = [];
-        for (let row = lastKnownRow + 1; row <= currentLastRow; row++) {
-            const recordData = extractNewRecordData(sheet, row);
-            if (validateRecordData(recordData)) {
-                newRows.push(recordData);
-            }
-        }
-
-        return newRows;
-
-    } catch (error) {
-        console.error("Ошибка при получении новых записей:", error);
-        return [];
-    }
-}
-
-/**
  * Проверяет настройки для детектора новых записей из листа "Настройки"
  * @return {boolean} true если детектор включен
  */
@@ -284,7 +201,6 @@ function isNewRecordDetectorEnabled() {
             }
         }
 
-        // Если параметр не найден, по умолчанию включаем
         console.log("Параметр ENABLE_NEW_RECORDS не найден, используем значение по умолчанию: true");
         return true;
 
