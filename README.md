@@ -29,6 +29,6 @@
 - **Google Cloud Console** - Google Apps Script проекты и API доступы
 - **Telegram Bot API v6.0** - отправка сообщений и файлов
 
-**Статус проекта:** Цветовые индикаторы работают | Детектор новых записей в разработке  
+**Статус проекта:** Цветовые индикаторы и детектор новых записей работают
 **Автор:** hawkxdev  
 **DevOps workflow:** VSCode → `clasp push` → Google Apps Script → Telegram  
