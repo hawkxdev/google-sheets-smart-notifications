@@ -9,38 +9,45 @@
  */
 
 /**
- * Основная функция детектора новых записей
- * Анализирует событие изменения и отправляет уведомления при добавлении новых строк
- * @param {Object} event - Объект события от Google Apps Script onEdit триггера
- */
+* Основная функция детектора новых записей
+* Анализирует событие изменения и отправляет уведомления при добавлении новых строк
+* @param {Object} event - Объект события от Google Apps Script onEdit триггера
+*/
 function detectNewRecord(event) {
-    try {
-        // Валидация события
-        if (!event?.range) {
-            console.log("detectNewRecord: Некорректный объект event");
-            return;
+try {
+// Проверяем, включен ли детектор новых записей
+if (!isNewRecordDetectorEnabled()) {
+debugLog('[detectNewRecord] Детектор новых записей отключен');
+return;
+}
+
+// Валидация события
+if (!event?.range) {
+            debugLog("detectNewRecord: Некорректный объект event");
+    return;
         }
 
-        const range = event.range;
-        const sheet = range.getSheet();
+const range = event.range;
+const sheet = range.getSheet();
 
-        console.log(`Проверяем новую запись для ячейки ${range.getA1Notation()} на листе "${sheet.getName()}"`);
+debugLog(`[Проверяем новую запись для ячейки ${range.getA1Notation()} на листе "${sheet.getName()}"]`);
 
-        // Проверяем, что это новая запись
-        if (!isNewRecord(event)) {
-            console.log("Это не новая запись, пропускаем уведомление");
+// Проверяем, что это новая запись
+if (!isNewRecord(event)) {
+    debugLog("Это не новая запись, пропускаем уведомление");
             return;
-        }
+}
 
         // Извлекаем данные новой записи
-        const recordData = extractNewRecordData(sheet, range.getRow());
-        console.log("Обнаружена новая запись:", recordData);
+    const recordData = extractNewRecordData(sheet, range.getRow());
+debugLog("Обнаружена новая запись:", JSON.stringify(recordData, null, 2));
 
         // Создаем и отправляем уведомление
         createNewRecordNotification(recordData);
 
     } catch (error) {
         console.error("Ошибка в detectNewRecord:", error);
+        debugLog('[detectNewRecord] Критическая ошибка:', error.stack || error.message);
     }
 }
 
@@ -256,34 +263,10 @@ function createNewRecordNotification(recordData) {
 }
 
 /**
- * Проверяет настройки для детектора новых записей из листа "Настройки"
+ * Проверяет настройки для детектора новых записей
+ * Использует централизованную систему настроек
  * @return {boolean} true если детектор включен
  */
 function isNewRecordDetectorEnabled() {
-    try {
-        const ss = SpreadsheetApp.getActiveSpreadsheet();
-        const settingsSheet = ss.getSheetByName("Настройки");
-
-        if (!settingsSheet) {
-            console.log("Лист 'Настройки' не найден, используем значение по умолчанию: true");
-            return true;
-        }
-
-        // Ищем параметр ENABLE_NEW_RECORDS в колонке A
-        const settingsData = settingsSheet.getRange("A:B").getValues();
-
-        for (const row of settingsData) {
-            if (row[0] === "ENABLE_NEW_RECORDS") {
-                const value = row[1];
-                return value === true || value === "TRUE" || value === "true";
-            }
-        }
-
-        console.log("Параметр ENABLE_NEW_RECORDS не найден, используем значение по умолчанию: true");
-        return true;
-
-    } catch (error) {
-        console.error("Ошибка при проверке настроек детектора:", error);
-        return true; // По умолчанию включаем при ошибке
-    }
+    return getSystemSetting('ENABLE_NEW_RECORDS', true);
 }

@@ -72,12 +72,14 @@ function determineStatusType(cellValue) {
             const keywords = STATUS_KEYWORDS[type];
             for (const keyword of keywords) {
                 if (valueStr.includes(keyword)) {
+                    debugLog(`[determineStatusType] Найден статус: ${type} (ключевое слово: "${keyword}")`);
                     return type;
                 }
             }
         }
     }
 
+    debugLog(`[determineStatusType] Статус не определен`);
     return null;
 }
 
@@ -93,7 +95,7 @@ function buildStatusMessage(cellInfo) {
     const rowContext = getRowContext(cellInfo.sheet, cellInfo.row);
     const timestamp = formatTimestamp(cellInfo.timestamp);
 
-    return `${emoji} *Изменение статуса*\n\n` +
+    const message = `${emoji} *Изменение статуса*\n\n` +
         `📊 *Лист:* ${cellInfo.sheet}\n` +
         `📍 *Ячейка:* ${cellInfo.address}\n` +
         `📝 *Столбец:* ${columnName}\n` +
@@ -101,4 +103,7 @@ function buildStatusMessage(cellInfo) {
         `💬 *Значение:* ${cellInfo.value}\n` +
         `${rowContext}` +
         `⏰ *Время:* ${timestamp}`;
+
+    debugLog('[buildStatusMessage] Сообщение сформировано, длина:', message.length, 'символов');
+    return message;
 }

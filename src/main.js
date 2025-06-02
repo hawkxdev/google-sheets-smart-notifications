@@ -167,3 +167,50 @@ function testNewRecordDetector() {
         sendTelegramMessage(`❌ Ошибка при тестировании: ${error.message}`);
     }
 }
+
+/**
+ * Тестирует новую систему настроек и лимитов
+ */
+function testAdvancedSettings() {
+    console.log("[testAdvancedSettings] Тестирование новых настроек...");
+
+    try {
+        // Тестируем чтение всех новых параметров
+        const maxNotifications = getSystemSetting('MAX_NOTIFICATIONS_PER_MINUTE', 10);
+        const debugEnabled = getSystemSetting('ENABLE_DEBUG_LOGGING', false);
+        const systemSheets = getSystemSetting('SYSTEM_SHEETS_EXCLUDE', 'Настройки,Лог');
+        const colorNotifications = getSystemSetting('ENABLE_COLOR_NOTIFICATIONS', true);
+        const newRecords = getSystemSetting('ENABLE_NEW_RECORDS', true);
+        const delayMs = getSystemSetting('NOTIFICATION_DELAY_MS', 1000);
+
+        // Тестируем rate limiting
+        const rateLimitOk = checkNotificationRateLimit();
+
+        // Тестируем проверку системных листов
+        const isSystemSheet1 = isSystemSheet('Настройки');
+        const isSystemSheet2 = isSystemSheet('Лог');
+        const isSystemSheet3 = isSystemSheet('Заявки');
+
+        const testMessage = `🔧 *ТЕСТ НОВЫХ НАСТРОЕК*\n\n` +
+                           `📊 **Параметры из таблицы:**\n` +
+                           `• Макс. уведомлений/мин: ${maxNotifications}\n` +
+                           `• Debug логирование: ${debugEnabled}\n` +
+                           `• Исключенные листы: ${systemSheets}\n` +
+                           `• Цветовые уведомления: ${colorNotifications}\n` +
+                           `• Новые записи: ${newRecords}\n` +
+                           `• Задержка уведомлений: ${delayMs}ms\n\n` +
+                           `🛡️ **Проверки системы:**\n` +
+                           `• Rate limiting: ${rateLimitOk ? '✅' : '❌'}\n` +
+                           `• Лист "Настройки" системный: ${isSystemSheet1 ? '✅' : '❌'}\n` +
+                           `• Лист "Лог" системный: ${isSystemSheet2 ? '✅' : '❌'}\n` +
+                           `• Лист "Заявки" НЕ системный: ${!isSystemSheet3 ? '✅' : '❌'}\n\n` +
+                           `⏰ **Время теста:** ${formatTimestamp(new Date())}\n\n` +
+                           `✅ **Система настроек работает!**`;
+
+        sendTelegramMessage(testMessage);
+        
+    } catch (error) {
+        console.error("[testAdvancedSettings] Ошибка:", error.stack || error.message);
+        sendTelegramMessage(`❌ Ошибка при тестировании настроек: ${error.message}`);
+    }
+}

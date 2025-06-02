@@ -135,15 +135,6 @@ function getStatusDescription(statusType) {
 }
 
 /**
- * Проверяет, является ли лист служебным
- * @param {string} sheetName - Название листа
- * @return {boolean} true, если лист служебный
- */
-function isSystemSheet(sheetName) {
-    return sheetName === "Настройки" || sheetName.startsWith("_");
-}
-
-/**
  * Форматирует временную метку для уведомлений
  * @param {Date} timestamp - Временная метка
  * @return {string} Отформатированное время
