@@ -67,14 +67,55 @@ function isNewRecord(event) {
         return false;
     }
 
-    // Проверяем, что в ячейке появились данные (не пустая)
+    // Проверяем тип изменения (массовая вставка или одиночная ячейка)
+    const rangeData = range.getValues();
+    const isMassInsertion = rangeData.length > 1 || rangeData[0].length > 1;
+
+    return isMassInsertion ?
+        checkMassInsertion(rangeData, rowIndex) :
+        checkSingleCell(range, rowIndex);
+}
+
+/**
+ * Проверяет массовую вставку на наличие новых записей
+ * @param {Array} rangeData - Данные диапазона
+ * @param {number} startRow - Начальная строка
+ * @return {boolean} true если найдена новая запись
+ */
+function checkMassInsertion(rangeData, startRow) {
+    const numRows = rangeData.length;
+    const numCols = rangeData[0].length;
+
+    console.log(`Обнаружена массовая вставка: ${numRows} строк, ${numCols} колонок`);
+
+    for (let i = 0; i < numRows; i++) {
+        const rowData = rangeData[i];
+        const hasClient = rowData[2] && rowData[2].toString().trim() !== ''; // Колонка C
+        const hasService = rowData[4] && rowData[4].toString().trim() !== ''; // Колонка E
+
+        if (hasClient || hasService) {
+            console.log(`Найдена новая запись в строке ${startRow + i} - заполнено ${hasClient ? 'Клиент' : 'Услуга'}`);
+            return true;
+        }
+    }
+
+    console.log("В массовой вставке не найдено ключевых полей");
+    return false;
+}
+
+/**
+ * Проверяет одиночную ячейку на наличие новой записи
+ * @param {GoogleAppsScript.Spreadsheet.Range} range - Диапазон ячеек
+ * @param {number} rowIndex - Индекс строки
+ * @return {boolean} true если это новая запись
+ */
+function checkSingleCell(range, rowIndex) {
     const cellValue = range.getValue();
     if (!cellValue || cellValue.toString().trim() === '') {
         console.log("Ячейка пустая, не считаем новой записью");
         return false;
     }
 
-    // Проверяем что это ключевое поле (Клиент или Услуга)
     const columnIndex = range.getColumn();
     const keyColumns = [3, 5]; // C: Клиент, E: Услуга
 
