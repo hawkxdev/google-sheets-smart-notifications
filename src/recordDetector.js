@@ -67,6 +67,12 @@ function isNewRecord(event) {
         return false;
     }
 
+    // Проверяем, была ли строка пустой до изменения
+    if (!isRowEmpty(sheet, rowIndex, range)) {
+        console.log(`Строка ${rowIndex} уже содержала данные - это изменение, а не новая запись`);
+        return false;
+    }
+
     // Проверяем тип изменения (массовая вставка или одиночная ячейка)
     const rangeData = range.getValues();
     const isMassInsertion = rangeData.length > 1 || rangeData[0].length > 1;
@@ -74,6 +80,37 @@ function isNewRecord(event) {
     return isMassInsertion ?
         checkMassInsertion(rangeData, rowIndex) :
         checkSingleCell(range, rowIndex);
+}
+
+/**
+ * Проверяет, была ли строка пустой до изменения
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - Лист таблицы
+ * @param {number} rowIndex - Индекс строки
+ * @param {GoogleAppsScript.Spreadsheet.Range} changedRange - Измененный диапазон
+ * @return {boolean} true если строка была пустой
+ */
+function isRowEmpty(sheet, rowIndex, changedRange) {
+    // Получаем все данные строки
+    const rowData = sheet.getRange(rowIndex, 1, 1, 6).getValues()[0];
+
+    // Получаем индексы измененных колонок
+    const changedColumns = [];
+    for (let col = changedRange.getColumn(); col < changedRange.getColumn() + changedRange.getNumColumns(); col++) {
+        changedColumns.push(col - 1); // -1 потому что индексы в массиве начинаются с 0
+    }
+
+    // Проверяем, были ли заполнены другие колонки
+    for (let i = 0; i < rowData.length; i++) {
+        // Пропускаем измененные колонки
+        if (changedColumns.indexOf(i) !== -1) continue;
+
+        // Если найдена заполненная ячейка - строка не была пустой
+        if (rowData[i] && rowData[i].toString().trim() !== '') {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /**
