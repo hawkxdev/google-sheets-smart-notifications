@@ -57,20 +57,20 @@ function isNewRecord(event) {
 
     // Работаем только с листом "Заявки"
     if (sheetName !== "Заявки") {
-        console.log(`Лист "${sheetName}" не отслеживается для новых записей`);
+        debugLog(`Лист "${sheetName}" не отслеживается для новых записей`);
         return false;
     }
 
     // Игнорируем заголовки (первая строка)
     const rowIndex = range.getRow();
     if (rowIndex <= 1) {
-        console.log("Игнорируем изменения в заголовках");
+        debugLog("Игнорируем изменения в заголовках");
         return false;
     }
 
     // Проверяем, была ли строка пустой до изменения
     if (!isRowEmpty(sheet, rowIndex, range)) {
-        console.log(`Строка ${rowIndex} уже содержала данные - это изменение, а не новая запись`);
+        debugLog(`Строка ${rowIndex} уже содержала данные - это изменение, а не новая запись`);
         return false;
     }
 
@@ -124,7 +124,7 @@ function checkMassInsertion(rangeData, startRow) {
     const numRows = rangeData.length;
     const numCols = rangeData[0].length;
 
-    console.log(`Обнаружена массовая вставка: ${numRows} строк, ${numCols} колонок`);
+    debugLog(`Обнаружена массовая вставка: ${numRows} строк, ${numCols} колонок`);
 
     for (let i = 0; i < numRows; i++) {
         const rowData = rangeData[i];
@@ -132,12 +132,12 @@ function checkMassInsertion(rangeData, startRow) {
         const hasService = rowData[4] && rowData[4].toString().trim() !== ''; // Колонка E
 
         if (hasClient || hasService) {
-            console.log(`Найдена новая запись в строке ${startRow + i} - заполнено ${hasClient ? 'Клиент' : 'Услуга'}`);
+            debugLog(`Найдена новая запись в строке ${startRow + i} - заполнено ${hasClient ? 'Клиент' : 'Услуга'}`);
             return true;
         }
     }
 
-    console.log("В массовой вставке не найдено ключевых полей");
+    debugLog("В массовой вставке не найдено ключевых полей");
     return false;
 }
 
@@ -150,7 +150,7 @@ function checkMassInsertion(rangeData, startRow) {
 function checkSingleCell(range, rowIndex) {
     const cellValue = range.getValue();
     if (!cellValue || cellValue.toString().trim() === '') {
-        console.log("Ячейка пустая, не считаем новой записью");
+        debugLog("Ячейка пустая, не считаем новой записью");
         return false;
     }
 
@@ -158,11 +158,11 @@ function checkSingleCell(range, rowIndex) {
     const keyColumns = [3, 5]; // C: Клиент, E: Услуга
 
     if (keyColumns.indexOf(columnIndex) === -1) {
-        console.log(`Столбец ${columnIndex} не является ключевым (Клиент или Услуга) - пропускаем уведомление`);
+        debugLog(`Столбец ${columnIndex} не является ключевым (Клиент или Услуга) - пропускаем уведомление`);
         return false;
     }
 
-    console.log(`Найдена новая запись в строке ${rowIndex} - заполнено ${columnIndex === 3 ? 'Клиент' : 'Услуга'}`);
+    debugLog(`Найдена новая запись в строке ${rowIndex} - заполнено ${columnIndex === 3 ? 'Клиент' : 'Услуга'}`);
     return true;
 }
 
@@ -246,7 +246,7 @@ function createNewRecordNotification(recordData) {
         message += `📊 *Лист:* ${recordData.sheet}\n`;
         message += `⏰ *Получено:* ${formatTimestamp(recordData.timestamp)}`;
 
-        console.log("Отправляем уведомление о новой записи:", message);
+        debugLog("Отправляем уведомление о новой записи:", message);
 
         // Отправляем уведомление через Telegram
         sendTelegramMessage(message);

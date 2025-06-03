@@ -18,7 +18,7 @@ function sendTelegramMessage(message) {
   try {
     // Проверяем лимиты частоты уведомлений
     if (!checkNotificationRateLimit()) {
-      console.log('[sendTelegramMessage] Превышен лимит частоты уведомлений, сообщение пропущено');
+      debugLog('[sendTelegramMessage] Превышен лимит частоты уведомлений, сообщение пропущено');
       return { ok: false, error: 'Rate limit exceeded' };
     }
 
@@ -53,7 +53,7 @@ function sendTelegramMessage(message) {
 
     debugLog('[sendTelegramMessage] Сообщение успешно отправлено');
 
-    // Добавляем задержку между уведомлениями
+    // Задержка между уведомлениями
     addNotificationDelay();
 
     return result;

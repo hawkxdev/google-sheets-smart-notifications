@@ -22,7 +22,7 @@ const STATUS_KEYWORDS = {
 function detectStatusChange(event) {
     try {
         if (!event?.range) {
-            console.log("detectStatusChange: Некорректный объект event", event);
+            debugLog("detectStatusChange: Некорректный объект event", event);
             return;
         }
 
@@ -30,11 +30,11 @@ function detectStatusChange(event) {
         const sheet = range.getSheet();
         const cellValue = range.getValue();
 
-        console.log(`Проверяем ячейку ${range.getA1Notation()} на листе "${sheet.getName()}": ${cellValue}`);
+        debugLog(`Проверяем ячейку ${range.getA1Notation()} на листе "${sheet.getName()}": ${cellValue}`);
 
         const statusType = determineStatusType(cellValue);
         if (!statusType) {
-            console.log("Изменение не является статусом — пропускаем");
+            debugLog("Изменение не является статусом — пропускаем");
             return;
         }
 
@@ -49,7 +49,7 @@ function detectStatusChange(event) {
         };
 
         const message = buildStatusMessage(cellInfo);
-        console.log("Отправка уведомления:", message);
+        debugLog("Отправка уведомления:", message);
         sendTelegramMessage(message);
 
     } catch (error) {

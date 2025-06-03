@@ -15,16 +15,16 @@ const DEMO_SPREADSHEET_ID = "112TSbwZz04kPHxEDvZBPC_blQ6xVDwZhOcimF32-ClA";
  */
 function onEdit(e) {
     try {
-        console.log(`[onEdit] Триггер сработал:`, e);
+        debugLog(`[onEdit] Триггер сработал:`, e);
 
         if (!e?.range) {
-            console.log("[onEdit] Некорректный объект события");
+            debugLog("[onEdit] Некорректный объект события");
             return;
         }
 
         const currentSpreadsheetId = e.source.getId();
         if (currentSpreadsheetId !== DEMO_SPREADSHEET_ID) {
-            console.log(`[onEdit] Игнорируется таблица: ${currentSpreadsheetId} (нужна: ${DEMO_SPREADSHEET_ID})`);
+            debugLog(`[onEdit] Игнорируется таблица: ${currentSpreadsheetId} (нужна: ${DEMO_SPREADSHEET_ID})`);
             return;
         }
 
@@ -32,10 +32,10 @@ function onEdit(e) {
         const sheet = range.getSheet();
         const sheetName = sheet.getName();
 
-        console.log(`[onEdit] Изменение на листе "${sheetName}", ячейка ${range.getA1Notation()}`);
+        debugLog(`[onEdit] Изменение на листе "${sheetName}", ячейка ${range.getA1Notation()}`);
 
         if (isSystemSheet(sheetName)) {
-            console.log("[onEdit] Игнорируем служебный лист");
+            debugLog("[onEdit] Игнорируем служебный лист");
             return;
         }
 
