@@ -1,20 +1,9 @@
-// config.js.example - Шаблон конфигурации
-// Скопируйте этот файл в config.js и заполните реальными значениями
+// Конфигурация Google Sheets Smart Notifications
 
 const CONFIG = {
   TELEGRAM: {
     BOT_TOKEN: "YOUR_BOT_TOKEN_HERE", // Получите от @BotFather
     CHAT_ID: "YOUR_CHAT_ID_HERE", // Ваш chat_id или группы
-    API_URL: "https://api.telegram.org/bot",
-    BOT_USERNAME: "@your_bot_username"
-  },
-  
-  NOTIFICATIONS: {
-    COLORS: {
-      RED: "🔴",
-      YELLOW: "🟡", 
-      GREEN: "🟢"
-    },
-    NEW_RECORD: "🆕"
+    API_URL: "https://api.telegram.org/bot"
   }
 };
