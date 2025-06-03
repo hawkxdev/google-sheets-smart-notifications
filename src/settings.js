@@ -159,7 +159,7 @@ function addNotificationDelay() {
  * @return {boolean} true, если лист служебный
  */
 function isSystemSheet(sheetName) {
-    const excludeList = getSystemSetting('SYSTEM_SHEETS_EXCLUDE', 'Настройки,Лог');
+    const excludeList = getSystemSetting('SYSTEM_SHEETS_EXCLUDE', 'Настройки');
     const systemSheets = excludeList.split(',').map(name => name.trim());
 
     return systemSheets.includes(sheetName) || sheetName.startsWith("_");

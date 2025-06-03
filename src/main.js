@@ -170,13 +170,13 @@ function testNewRecordDetector() {
  * Тестирует новую систему настроек и лимитов
  */
 function testAdvancedSettings() {
-    console.log("[testAdvancedSettings] Тестирование новых настроек...");
+    console.log("[testAdvancedSettings] Тестирование настроек...");
 
     try {
         // Тестируем чтение всех новых параметров
         const maxNotifications = getSystemSetting('MAX_NOTIFICATIONS_PER_MINUTE', 10);
         const debugEnabled = getSystemSetting('ENABLE_DEBUG_LOGGING', false);
-        const systemSheets = getSystemSetting('SYSTEM_SHEETS_EXCLUDE', 'Настройки,Лог');
+        const systemSheets = getSystemSetting('SYSTEM_SHEETS_EXCLUDE', 'Настройки');
         const colorNotifications = getSystemSetting('ENABLE_COLOR_NOTIFICATIONS', true);
         const newRecords = getSystemSetting('ENABLE_NEW_RECORDS', true);
         const delayMs = getSystemSetting('NOTIFICATION_DELAY_MS', 1000);
@@ -188,7 +188,7 @@ function testAdvancedSettings() {
         const isSystemSheet1 = isSystemSheet('Настройки');
         const isSystemSheet3 = isSystemSheet('Заявки');
 
-        const testMessage = `🔧 *ТЕСТ НОВЫХ НАСТРОЕК*\n\n` +
+        const testMessage = `🔧 *ТЕСТ НАСТРОЕК*\n\n` +
             `📊 **Параметры из таблицы:**\n` +
             `• Макс. уведомлений/мин: ${maxNotifications}\n` +
             `• Debug логирование: ${debugEnabled}\n` +
