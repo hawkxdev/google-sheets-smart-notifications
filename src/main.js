@@ -186,7 +186,6 @@ function testAdvancedSettings() {
 
         // Тестируем проверку системных листов
         const isSystemSheet1 = isSystemSheet('Настройки');
-        const isSystemSheet2 = isSystemSheet('Лог');
         const isSystemSheet3 = isSystemSheet('Заявки');
 
         const testMessage = `🔧 *ТЕСТ НОВЫХ НАСТРОЕК*\n\n` +
@@ -200,7 +199,6 @@ function testAdvancedSettings() {
             `🛡️ **Проверки системы:**\n` +
             `• Rate limiting: ${rateLimitOk ? '✅' : '❌'}\n` +
             `• Лист "Настройки" системный: ${isSystemSheet1 ? '✅' : '❌'}\n` +
-            `• Лист "Лог" системный: ${isSystemSheet2 ? '✅' : '❌'}\n` +
             `• Лист "Заявки" НЕ системный: ${!isSystemSheet3 ? '✅' : '❌'}\n\n` +
             `⏰ **Время теста:** ${formatTimestamp(new Date())}\n\n` +
             `✅ **Система настроек работает!**`;

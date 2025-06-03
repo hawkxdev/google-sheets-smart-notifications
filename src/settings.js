@@ -44,7 +44,6 @@ function getSystemSetting(parameterName, defaultValue = null) {
         const now = new Date();
         if (settingsCache && lastCacheUpdate && (now.getTime() - lastCacheUpdate.getTime()) < CACHE_DURATION_MS) {
             if (settingsCache.hasOwnProperty(parameterName)) {
-                debugLog(`[getSystemSetting] Из кэша: ${parameterName} = ${settingsCache[parameterName]}`);
                 return settingsCache[parameterName];
             }
         }
@@ -57,7 +56,6 @@ function getSystemSetting(parameterName, defaultValue = null) {
             ? settingsCache[parameterName]
             : defaultOrFallback;
 
-        debugLog(`[getSystemSetting] ${parameterName} = ${value}`);
         return value;
 
     } catch (error) {
@@ -72,7 +70,7 @@ function getSystemSetting(parameterName, defaultValue = null) {
  */
 function refreshSettingsCache() {
     try {
-        const ss = SpreadsheetApp.getActiveSpreadsheet();
+        const ss = SpreadsheetApp.openById(DEMO_SPREADSHEET_ID);
         const settingsSheet = ss.getSheetByName("Настройки");
 
         if (!settingsSheet) {
@@ -105,8 +103,6 @@ function refreshSettingsCache() {
         settingsCache = { ...DEFAULT_SETTINGS, ...newCache };
         lastCacheUpdate = new Date();
 
-        debugLog('[refreshSettingsCache] Кэш настроек обновлен:', Object.keys(settingsCache).length, 'параметров');
-
     } catch (error) {
         console.error("Ошибка при обновлении кэша настроек:", error);
         settingsCache = { ...DEFAULT_SETTINGS };
@@ -128,12 +124,10 @@ function checkNotificationRateLimit() {
     }
 
     if (notificationCount >= maxPerMinute) {
-        debugLog(`[checkNotificationRateLimit] Лимит превышен: ${notificationCount}/${maxPerMinute}`);
         return false;
     }
 
     notificationCount++;
-    debugLog(`[checkNotificationRateLimit] Разрешено: ${notificationCount}/${maxPerMinute}`);
     return true;
 }
 
@@ -142,7 +136,9 @@ function checkNotificationRateLimit() {
  * @param {...any} args - Аргументы для логирования
  */
 function debugLog(...args) {
-    if (getSystemSetting('ENABLE_DEBUG_LOGGING', false)) {
+    // Прямая проверка кэша без рекурсии
+    const debugEnabled = settingsCache?.ENABLE_DEBUG_LOGGING ?? DEFAULT_SETTINGS.ENABLE_DEBUG_LOGGING;
+    if (debugEnabled) {
         console.log('[DEBUG]', ...args);
     }
 }
@@ -154,7 +150,6 @@ function addNotificationDelay() {
     const delayMs = getSystemSetting('NOTIFICATION_DELAY_MS', 1000);
     if (delayMs > 0) {
         Utilities.sleep(delayMs);
-        debugLog(`[addNotificationDelay] Задержка: ${delayMs}ms`);
     }
 }
 
