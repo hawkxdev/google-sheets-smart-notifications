@@ -1,7 +1,7 @@
 /**
  * @fileoverview Google Sheets Smart Notifications - Telegram Integration
  * Основные функции для отправки уведомлений через Telegram Bot API
- * 
+ *
  * @author hawkxdev
  * @version 1.0
  * @since 2025-05-31
@@ -10,7 +10,7 @@
 /**
  * Отправка сообщения в Telegram с интегрированными проверками
  * Использует Telegram Bot API для отправки форматированных сообщений с Markdown
- * 
+ *
  * @param {string} message - Текст сообщения (поддерживает Markdown разметку)
  * @return {Object|null} Ответ от Telegram API или null при ошибке
  */
@@ -26,24 +26,24 @@ function sendTelegramMessage(message) {
 
     // Формируем URL для Telegram Bot API
     const url = `${CONFIG.TELEGRAM.API_URL}${CONFIG.TELEGRAM.BOT_TOKEN}/sendMessage`;
-    
+
     // Подготавливаем полезную нагрузку для API запроса
     const payload = {
       chat_id: CONFIG.TELEGRAM.CHAT_ID,
       text: message,
       parse_mode: "Markdown" // Включаем поддержку Markdown разметки
     };
-    
+
     // Отправляем POST запрос к Telegram API
     const response = UrlFetchApp.fetch(url, {
       method: "post",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
       payload: JSON.stringify(payload)
     });
-    
+
     // Парсим ответ от API
     const result = JSON.parse(response.getContentText());
-    
+
     // Проверяем статус ответа
     if (!result?.ok) {
       console.error("Ошибка Telegram API:", result);
@@ -52,17 +52,17 @@ function sendTelegramMessage(message) {
     }
 
     debugLog('[sendTelegramMessage] Сообщение успешно отправлено');
-    
+
     // Добавляем задержку между уведомлениями
     addNotificationDelay();
-    
+
     return result;
-    
+
   } catch (error) {
     // Логируем ошибку и возвращаем null
     console.error("Не удалось отправить сообщение в Telegram:", error);
     debugLog('[sendTelegramMessage] Исключение:', error.stack || error.message);
-    
+
     // Попытка отправить упрощенное сообщение об ошибке
     try {
       const errorUrl = `${CONFIG.TELEGRAM.API_URL}${CONFIG.TELEGRAM.BOT_TOKEN}/sendMessage`;
@@ -71,17 +71,17 @@ function sendTelegramMessage(message) {
         text: `❌ Ошибка системы уведомлений: ${error.message}`,
         parse_mode: "Markdown"
       };
-      
+
       UrlFetchApp.fetch(errorUrl, {
         method: "post",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         payload: JSON.stringify(errorPayload)
       });
-      
+
     } catch (fallbackError) {
       console.error("Не удалось отправить даже упрощенное сообщение об ошибке:", fallbackError);
     }
-    
+
     return null;
   }
 }
@@ -93,52 +93,16 @@ function sendTelegramMessage(message) {
 function testTelegramConnection() {
   try {
     const testMessage = `🧪 *ТЕСТ ПОДКЛЮЧЕНИЯ*\n\n` +
-                       `⏰ Время: ${formatTimestamp(new Date())}\n` +
-                       `🤖 Бот: ${CONFIG.TELEGRAM.BOT_USERNAME}\n` +
-                       `📊 Chat ID: ${CONFIG.TELEGRAM.CHAT_ID}\n\n` +
-                       `✅ Telegram интеграция работает!`;
-    
+      `⏰ Время: ${formatTimestamp(new Date())}\n` +
+      `🤖 Бот: ${CONFIG.TELEGRAM.BOT_USERNAME}\n` +
+      `📊 Chat ID: ${CONFIG.TELEGRAM.CHAT_ID}\n\n` +
+      `✅ Telegram интеграция работает!`;
+
     const result = sendTelegramMessage(testMessage);
     return result?.ok || false;
-    
+
   } catch (error) {
     console.error('Ошибка при тестировании Telegram подключения:', error);
     return false;
-  }
-}
-
-/**
- * Отправляет сообщение с обходом лимитов (для критических уведомлений)
- * @param {string} message - Текст сообщения
- * @return {Object|null} Ответ от Telegram API
- */
-function sendCriticalTelegramMessage(message) {
-  try {
-    debugLog('[sendCriticalTelegramMessage] Критическое сообщение:', message.substring(0, 100) + '...');
-
-    const url = `${CONFIG.TELEGRAM.API_URL}${CONFIG.TELEGRAM.BOT_TOKEN}/sendMessage`;
-    const payload = {
-      chat_id: CONFIG.TELEGRAM.CHAT_ID,
-      text: `🚨 КРИТИЧНО: ${message}`,
-      parse_mode: "Markdown"
-    };
-    
-    const response = UrlFetchApp.fetch(url, {
-      method: "post",
-      headers: {"Content-Type": "application/json"},
-      payload: JSON.stringify(payload)
-    });
-    
-    const result = JSON.parse(response.getContentText());
-    
-    if (!result?.ok) {
-      console.error("Ошибка при отправке критического сообщения:", result);
-    }
-    
-    return result;
-    
-  } catch (error) {
-    console.error("Критическая ошибка Telegram:", error);
-    return null;
   }
 }

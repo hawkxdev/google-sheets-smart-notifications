@@ -171,25 +171,6 @@ function isSystemSheet(sheetName) {
 }
 
 /**
- * Сбрасывает кэш настроек (принудительное обновление)
- */
-function clearSettingsCache() {
-    settingsCache = null;
-    lastCacheUpdate = null;
-    debugLog('[clearSettingsCache] Кэш настроек очищен');
-}
-
-/**
- * Получает все текущие настройки для отладки
- * @return {Object} Объект со всеми настройками
- */
-function getAllSettings() {
-    // Принудительно обновляем кэш
-    refreshSettingsCache();
-    return { ...settingsCache };
-}
-
-/**
  * Проверяет настройки для детектора новых записей
  * @return {boolean} true если детектор включен
  */

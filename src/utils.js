@@ -23,11 +23,6 @@ const STATUS_TYPES = Object.freeze({
 const KEY_COLUMNS = ['клиент', 'товар', 'заказ', 'проект', 'задача', 'id'];
 
 /**
- * Ключевые столбцы для новых записей (лист "Заявки")
- */
-const NEW_RECORD_KEY_COLUMNS = [1, 3, 5, 6]; // Дата, Клиент, Услуга, Бюджет
-
-/**
  * Преобразует индекс столбца в буквенное обозначение
  * @param {number} colIndex - Индекс столбца (1-based)
  * @return {string} Буквенное обозначение (A, B, C, ...)
@@ -141,13 +136,4 @@ function getStatusDescription(statusType) {
  */
 function formatTimestamp(timestamp) {
     return Utilities.formatDate(timestamp, Session.getScriptTimeZone(), 'dd.MM.yyyy HH:mm');
-}
-
-/**
- * Безопасно получает значение ячейки как строку
- * @param {any} cellValue - Значение ячейки
- * @return {string} Строковое представление значения
- */
-function getCellValueAsString(cellValue) {
-    return String(cellValue || '').toLowerCase().trim();
 }

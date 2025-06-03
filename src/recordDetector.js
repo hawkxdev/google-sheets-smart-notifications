@@ -14,33 +14,27 @@
 * @param {Object} event - Объект события от Google Apps Script onEdit триггера
 */
 function detectNewRecord(event) {
-try {
-// Проверяем, включен ли детектор новых записей
-if (!isNewRecordDetectorEnabled()) {
-debugLog('[detectNewRecord] Детектор новых записей отключен');
-return;
-}
-
-// Валидация события
-if (!event?.range) {
+    try {
+        // Валидация события
+        if (!event?.range) {
             debugLog("detectNewRecord: Некорректный объект event");
-    return;
+            return;
         }
 
-const range = event.range;
-const sheet = range.getSheet();
+        const range = event.range;
+        const sheet = range.getSheet();
 
-debugLog(`[Проверяем новую запись для ячейки ${range.getA1Notation()} на листе "${sheet.getName()}"]`);
+        debugLog(`[Проверяем новую запись для ячейки ${range.getA1Notation()} на листе "${sheet.getName()}"]`);
 
-// Проверяем, что это новая запись
-if (!isNewRecord(event)) {
-    debugLog("Это не новая запись, пропускаем уведомление");
+        // Проверяем, что это новая запись
+        if (!isNewRecord(event)) {
+            debugLog("Это не новая запись, пропускаем уведомление");
             return;
-}
+        }
 
         // Извлекаем данные новой записи
-    const recordData = extractNewRecordData(sheet, range.getRow());
-debugLog("Обнаружена новая запись:", JSON.stringify(recordData, null, 2));
+        const recordData = extractNewRecordData(sheet, range.getRow());
+        debugLog("Обнаружена новая запись:", JSON.stringify(recordData, null, 2));
 
         // Создаем и отправляем уведомление
         createNewRecordNotification(recordData);
@@ -260,13 +254,4 @@ function createNewRecordNotification(recordData) {
     } catch (error) {
         console.error("Ошибка при создании уведомления о новой записи:", error);
     }
-}
-
-/**
- * Проверяет настройки для детектора новых записей
- * Использует централизованную систему настроек
- * @return {boolean} true если детектор включен
- */
-function isNewRecordDetectorEnabled() {
-    return getSystemSetting('ENABLE_NEW_RECORDS', true);
 }
