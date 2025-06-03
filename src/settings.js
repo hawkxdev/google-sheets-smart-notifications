@@ -27,12 +27,6 @@ let lastCacheUpdate = null;
 const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 минут
 
 /**
- * Счетчик уведомлений для rate limiting
- */
-let notificationCount = 0;
-let notificationWindowStart = new Date();
-
-/**
  * Централизованная функция чтения настроек из листа "Настройки"
  * @param {string} parameterName - Название параметра
  * @param {any} defaultValue - Значение по умолчанию
@@ -111,24 +105,62 @@ function refreshSettingsCache() {
 
 /**
  * Проверяет лимиты уведомлений (rate limiting)
+ * Использует PropertiesService для персистентного хранения между выполнениями
  * @return {boolean} true если можно отправлять уведомление
  */
 function checkNotificationRateLimit() {
     const maxPerMinute = getSystemSetting('MAX_NOTIFICATIONS_PER_MINUTE', 10);
     const now = new Date();
+    const currentMinute = Math.floor(now.getTime() / 60000); // Округляем до минут
 
-    // Сброс счетчика каждую минуту
-    if ((now.getTime() - notificationWindowStart.getTime()) >= 60000) {
-        notificationCount = 0;
-        notificationWindowStart = now;
+    // Получаем данные из PropertiesService
+    const properties = PropertiesService.getScriptProperties();
+    const lastMinute = parseInt(properties.getProperty('RATE_LIMIT_MINUTE') || '0');
+    const count = parseInt(properties.getProperty('RATE_LIMIT_COUNT') || '0');
+
+    console.log(`[Rate Limit] Текущая минута: ${currentMinute}, последняя: ${lastMinute}`);
+
+    // Если прошла минута, сбрасываем счетчик
+    if (currentMinute > lastMinute) {
+        properties.setProperties({
+            'RATE_LIMIT_MINUTE': currentMinute.toString(),
+            'RATE_LIMIT_COUNT': '0'
+        });
+        console.log(`[Rate Limit] Новая минута - счетчик сброшен`);
+        return checkNotificationRateLimit(); // Рекурсивно вызываем с обновленными данными
     }
 
-    if (notificationCount >= maxPerMinute) {
+    console.log(`[Rate Limit] Текущий счетчик: ${count}/${maxPerMinute}`);
+
+    if (count >= maxPerMinute) {
+        console.log(`[Rate Limit] БЛОКИРОВАНО - превышен лимит ${maxPerMinute} уведомлений в минуту`);
         return false;
     }
 
-    notificationCount++;
+    // Увеличиваем счетчик
+    const newCount = count + 1;
+    properties.setProperty('RATE_LIMIT_COUNT', newCount.toString());
+    console.log(`[Rate Limit] РАЗРЕШЕНО - отправлено ${newCount}/${maxPerMinute} уведомлений`);
     return true;
+}
+
+/**
+ * Принудительно сбрасывает кэш настроек
+ */
+function forceRefreshSettings() {
+    settingsCache = null;
+    lastCacheUpdate = null;
+    console.log("[Settings] Кэш настроек принудительно сброшен");
+}
+
+/**
+ * Сбрасывает счетчик rate limiting (для тестирования)
+ */
+function resetRateLimit() {
+    const properties = PropertiesService.getScriptProperties();
+    properties.deleteProperty('RATE_LIMIT_MINUTE');
+    properties.deleteProperty('RATE_LIMIT_COUNT');
+    console.log("[Rate Limit] Счетчик принудительно сброшен");
 }
 
 /**

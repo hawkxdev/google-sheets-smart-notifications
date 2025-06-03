@@ -210,3 +210,39 @@ function testAdvancedSettings() {
         sendTelegramMessage(`❌ Ошибка при тестировании настроек: ${error.message}`);
     }
 }
+
+/**
+ * Тестирует rate limiting уведомлений
+ */
+function testRateLimit() {
+    console.log("[testRateLimit] Тестирование лимитов уведомлений...");
+
+    try {
+        // Сбрасываем кэш для получения актуальных настроек
+        forceRefreshSettings();
+
+        // Читаем текущий лимит
+        const maxNotifications = getSystemSetting('MAX_NOTIFICATIONS_PER_MINUTE', 10);
+        console.log(`[testRateLimit] Текущий лимит: ${maxNotifications} уведомлений в минуту`);
+
+        // Попробуем отправить несколько сообщений
+        for (let i = 1; i <= Math.min(3, maxNotifications + 2); i++) {
+            const result = sendTelegramMessage(`🧪 ТЕСТ RATE LIMIT #${i}\n\nПроверяем лимит ${maxNotifications} уведомлений/мин`);
+
+            if (result?.ok) {
+                console.log(`[testRateLimit] Сообщение ${i} отправлено успешно`);
+            } else {
+                console.log(`[testRateLimit] Сообщение ${i} заблокировано rate limiting`);
+                break;
+            }
+
+            // Небольшая пауза между попытками
+            Utilities.sleep(100);
+        }
+
+        console.log("[testRateLimit] Тест завершен");
+
+    } catch (error) {
+        console.error("[testRateLimit] Ошибка:", error.stack || error.message);
+    }
+}
